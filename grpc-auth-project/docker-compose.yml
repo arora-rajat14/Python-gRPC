@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  postgres_db:
+    image: postgres:14-alpine # Use a specific PostgreSQL version
+    container_name: grpc_postgres
+    environment:
+      POSTGRES_USER: user # Keep credentials secure in real projects (e.g., .env file)
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: authdb
+    ports:
+      - "5432:5432" # Expose port for potential direct access/debugging (optional)
+    volumes:
+      - postgres_data:/var/lib/postgresql/data # Persist data
+    networks:
+      - grpc_network
+
+  auth_service:
+    container_name: grpc_auth_service
+    build: ./auth_service # Build from the Dockerfile in auth_service directory
+    ports:
+      - "50051:50051" # Expose gRPC port
+    environment:
+      DATABASE_URL: postgresql://user:password@postgres_db:5432/authdb # DB connection string
+      JWT_SECRET: your-super-secret-key # CHANGE THIS! Use env var in production
+    depends_on:
+      - postgres_db # Wait for DB to be ready (basic dependency, might need wait-for-it script in production)
+    networks:
+      - grpc_network
+    volumes:
+      - ./protos:/app/protos # Mount protos for code generation if needed inside container, or copy during build
+      - ./auth_service:/app # Mount code for development ease (remove for production build)
+
+  profile_service:
+    container_name: grpc_profile_service
+    build: ./profile_service
+    ports:
+      - "50052:50052" # Expose gRPC port for ProfileService
+    environment:
+      AUTH_SERVICE_URL: auth_service:50051 # How ProfileService finds AuthService
+      JWT_SECRET: your-super-secret-key # Must match AuthService secret
+    depends_on:
+      - auth_service # Depends on auth service being available
+    networks:
+      - grpc_network
+    volumes:
+      - ./protos:/app/protos # Mount protos
+      - ./profile_service:/app # Mount code
+
+networks:
+  grpc_network:
+    driver: bridge
+
+volumes:
+  postgres_data: # Define the named volume for data persistence

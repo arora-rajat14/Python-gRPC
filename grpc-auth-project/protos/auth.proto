@@ -1,0 +1,64 @@
+syntax="proto3";
+
+package auth;
+
+// ---- Authentication Service Definition ----
+
+service AuthService{
+    rpc Register (RegisterRequest) returns (RegisterResponse);
+    rpc Login (LoginRequest) returns (LoginResponse);
+    // Used by other services to verify the token
+    rpc VerifyToken (VerifyTokenRequest) returns (VerifyTokenResponse);
+}
+
+// Messages for Register RPC
+message RegisterRequest{
+    string username = 1;
+    string password = 2;
+}
+message RegisterResponse{
+    bool success = 1;
+    string message = 2; // Error message if registration fails
+}
+
+// Messages for Login RPC
+message LoginRequest{
+    string username = 1;
+    string password = 2;
+}
+message LoginResponse{
+    string token = 1;
+    bool success = 2;
+    string message = 3; // Error message if login fails
+}
+// Messages for VerifyToken RPC
+message VerifyTokenRequest{
+    string token = 1;
+}
+message VerifyTokenResponse{
+    bool is_valid = 1;
+    string username = 2;
+    string message = 3; // Error message if token is invalid
+}
+
+// ----- Profile Service Definition -----
+// We need at least one method here to demonstrate token usage.
+// Note: ProfileService *calls* AuthService, but it also *is* a service.
+service ProfileService{
+    // Requires JWT token which will be in metadata
+    rpc GetProfile (GetProfileRequest) returns (GetProfileResponse);
+}
+
+message GetProfileRequest{
+    // Usually empty if user identified by token,
+    // but could include specific profile IDs if needed.
+    // string user_id_to_fetch = 1;
+}
+
+message GetProfileResponse {
+    string user_id = 1;
+    string email = 2; // Example profile data
+    string full_name = 3; // Example profile data
+    bool success = 4;
+    string message = 5;
+}

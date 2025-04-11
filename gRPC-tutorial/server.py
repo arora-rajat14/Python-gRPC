@@ -10,6 +10,7 @@ import greeter_pb2_grpc
 
 # Create a class inheriting from the generated Servicer
 # Implement the RPC method defined in the .proto file
+# GreeterServicer within grpc file is abstract
 class GreeterServicer(greeter_pb2_grpc.GreeterServicer):
     def SayHello(self, request, context):
         logging.info(f"Received SayHello request with name: {request.name}")
@@ -21,15 +22,18 @@ class GreeterServicer(greeter_pb2_grpc.GreeterServicer):
 def serve():
     # Create a gRPC server instance
     # futures.ThreadPoolExecutor creates a pool of threads to handle requests
+    # Factory function to create server instances
     server = grpc.server(futures.ThreadPoolExecutor(max_workers=10))
 
     # Add the implemented Servicer to the server
+    # Crucial step registers your service to the server
     greeter_pb2_grpc.add_GreeterServicer_to_server(GreeterServicer(), server)
 
     # Define the address and port the server will listen on
     server_address = (
         "[::]:50051"  # '[::]' listens on all available IPv6 and IPv4 interfaces
     )
+    # For local development we can add this, this means no SSL, but for production don't use this
     server.add_insecure_port(server_address)  # Use insecure connection for simplicity
 
     # Start the server

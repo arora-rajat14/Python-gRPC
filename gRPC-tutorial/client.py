@@ -22,7 +22,7 @@ def run():
             stub = greeter_pb2_grpc.GreeterStub(channel)
 
             # Create a request message object
-            name_to_greet = "gRPC User"
+            name_to_greet = "Rajat Arora"
             request = greeter_pb2.HelloRequest(name=name_to_greet)
             logging.info(f"Sending request with name: {name_to_greet}")
 

@@ -1,0 +1,6 @@
+grpcio
+grpcio-tools # Good to include for consistency, even if only used for generation initially
+psycopg2-binary # PostgreSQL driver
+passlib[bcrypt] # Password hashing
+PyJWT # JSON Web Tokens
+python-dotenv # To load env vars if using .env file (good practice)
