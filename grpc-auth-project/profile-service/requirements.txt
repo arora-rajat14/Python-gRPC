@@ -1,0 +1,3 @@
+grpcio
+grpcio-tools
+python-dotenv # Only needed if you plan to use .env here too
